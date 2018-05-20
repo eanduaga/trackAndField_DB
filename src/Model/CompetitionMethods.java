@@ -5,6 +5,7 @@
  */
 package Model;
 
+import com.mysql.jdbc.Statement;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,7 +14,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -21,6 +26,57 @@ import java.util.ArrayList;
  */
 public class CompetitionMethods
 {
+    public static ArrayList <Competition> fillTableCompetition() throws IOException
+    {
+        // Define the variables
+        ArrayList <Competition> alComp = new ArrayList();
+        String sqlQuery;
+        DBConnection cnt = new DBConnection();
+        Statement stmt = null;
+        ResultSet rs = null;
+        
+        try
+        {
+            stmt = (Statement) cnt.getDBConnection().createStatement();
+            sqlQuery = "SELECT * FROM competition";
+            rs = stmt.executeQuery(sqlQuery);
+            
+            while(rs.next())
+            {
+                Competition comp = new Competition(false);
+                comp.setCode(rs.getString("compCode"));
+                comp.setName(rs.getString("compName"));
+                comp.setDescription(rs.getString("compDescription"));
+                comp.setLocation(rs.getString("compLocation"));
+                comp.setStartDate(rs.getDate("compStartDate"));
+                comp.setEndDate(rs.getDate("compEndDate"));
+                alComp.add(comp);
+            }
+        }
+        catch(SQLException ex)
+        {
+            Logger.getLogger(DBConnection.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        finally
+        {
+            try { rs.close(); } catch (SQLException e) { /* ignored */ }
+            try { stmt.close(); } catch (SQLException e) { /* ignored */ }
+            try { cnt.disconnect(); } catch (Exception e) { /* ignored */ }
+        }
+
+        return alComp;
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     public static void writeCompetition(Competition cmp) throws IOException
     {
         // Define the variables

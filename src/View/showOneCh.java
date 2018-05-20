@@ -37,7 +37,7 @@ public class showOneCh extends javax.swing.JFrame {
         jLabel_exit = new javax.swing.JLabel();
         jLabel_minimize = new javax.swing.JLabel();
         jLabel_viewTitle = new javax.swing.JLabel();
-        jLabel_startYearCh = new javax.swing.JLabel();
+        jLabel_teamCh = new javax.swing.JLabel();
         jLabel_phoneNumCh = new javax.swing.JLabel();
         jLabel_emailCh = new javax.swing.JLabel();
         jLabel_birthDateCh = new javax.swing.JLabel();
@@ -51,7 +51,9 @@ public class showOneCh extends javax.swing.JFrame {
         jLabel_birthDateTitle = new javax.swing.JLabel();
         jLabel_emailTitle = new javax.swing.JLabel();
         jLabel_phoneNumTitle = new javax.swing.JLabel();
+        jLabel_teamTitle = new javax.swing.JLabel();
         jLabel_startYearTitle = new javax.swing.JLabel();
+        jLabel_startYearCh = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setUndecorated(true);
@@ -116,9 +118,9 @@ public class showOneCh extends javax.swing.JFrame {
 
         jPanel1.add(jPanel_header, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 580, 50));
 
-        jLabel_startYearCh.setFont(new java.awt.Font("Century Gothic", 0, 14)); // NOI18N
-        jLabel_startYearCh.setForeground(new java.awt.Color(52, 50, 46));
-        jPanel1.add(jLabel_startYearCh, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 490, 200, 40));
+        jLabel_teamCh.setFont(new java.awt.Font("Century Gothic", 0, 14)); // NOI18N
+        jLabel_teamCh.setForeground(new java.awt.Color(52, 50, 46));
+        jPanel1.add(jLabel_teamCh, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 530, 200, 40));
 
         jLabel_phoneNumCh.setFont(new java.awt.Font("Century Gothic", 0, 14)); // NOI18N
         jLabel_phoneNumCh.setForeground(new java.awt.Color(52, 50, 46));
@@ -180,10 +182,19 @@ public class showOneCh extends javax.swing.JFrame {
         jLabel_phoneNumTitle.setText("Phone Number:");
         jPanel1.add(jLabel_phoneNumTitle, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 450, -1, 40));
 
+        jLabel_teamTitle.setFont(new java.awt.Font("Century Gothic", 1, 14)); // NOI18N
+        jLabel_teamTitle.setForeground(new java.awt.Color(52, 50, 46));
+        jLabel_teamTitle.setText("Team:");
+        jPanel1.add(jLabel_teamTitle, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 530, -1, 40));
+
         jLabel_startYearTitle.setFont(new java.awt.Font("Century Gothic", 1, 14)); // NOI18N
         jLabel_startYearTitle.setForeground(new java.awt.Color(52, 50, 46));
         jLabel_startYearTitle.setText("Start Year:");
         jPanel1.add(jLabel_startYearTitle, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 489, -1, 40));
+
+        jLabel_startYearCh.setFont(new java.awt.Font("Century Gothic", 0, 14)); // NOI18N
+        jLabel_startYearCh.setForeground(new java.awt.Color(52, 50, 46));
+        jPanel1.add(jLabel_startYearCh, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 490, 200, 40));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -195,7 +206,9 @@ public class showOneCh extends javax.swing.JFrame {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 573, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 619, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
 
         pack();
@@ -246,6 +259,8 @@ public class showOneCh extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel_phoneNumTitle;
     public javax.swing.JLabel jLabel_startYearCh;
     private javax.swing.JLabel jLabel_startYearTitle;
+    public javax.swing.JLabel jLabel_teamCh;
+    private javax.swing.JLabel jLabel_teamTitle;
     private javax.swing.JLabel jLabel_viewTitle;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel_header;

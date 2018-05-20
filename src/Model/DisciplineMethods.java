@@ -11,6 +11,7 @@ package Model;
  */
 
 // Import the libraries
+import com.mysql.jdbc.Statement;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,10 +20,65 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DisciplineMethods
 {
+    public static ArrayList <Discipline> fillTableDiscipline() throws IOException
+    {
+        // Define the variables
+        ArrayList <Discipline> alDis = new ArrayList();
+        float[] wr = new float[2];
+        String sqlQuery;
+        DBConnection cnt = new DBConnection();
+        Statement stmt = null;
+        ResultSet rs = null;
+        
+        try
+        {
+            stmt = (Statement) cnt.getDBConnection().createStatement();
+            sqlQuery = "SELECT * FROM discipline";
+            rs = stmt.executeQuery(sqlQuery);
+            
+            while(rs.next())
+            {
+                Discipline dis = new Discipline(false);
+                dis.setCode(rs.getString("disCode"));
+                dis.setName(rs.getString("disName"));
+                dis.setDescription(rs.getString("disDescription"));
+                wr[0] = rs.getFloat("disMaleWR");
+                wr[1] = rs.getFloat("disFemaleWR");
+                dis.setWorldRecord(wr);
+                alDis.add(dis);
+            }
+        }
+        catch(SQLException ex)
+        {
+            Logger.getLogger(DBConnection.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        finally
+        {
+            try { rs.close(); } catch (SQLException e) { /* ignored */ }
+            try { stmt.close(); } catch (SQLException e) { /* ignored */ }
+            try { cnt.disconnect(); } catch (Exception e) { /* ignored */ }
+        }
+
+        return alDis;
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
     public static void writeDiscipline(Discipline dis) throws IOException
     {
         // Define the variables

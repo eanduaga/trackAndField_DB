@@ -83,10 +83,12 @@ public class SendMailMethods
             Message message = new MimeMessage(session);
             message.setFrom(new InternetAddress("trackandfieldcompetitions@gmail.com"));
             message.setRecipients(Message.RecipientType.TO,
-                    InternetAddress.parse(accRecInfo[2]));
+                    InternetAddress.parse(accRecInfo[3]));
             message.setSubject("Password Recovery - Track And Field Competitions");
-            message.setText("Hello " + accRecInfo[1] + ","
-                    + "\n\nThis is the password of your account: " + accRecInfo[0]
+            message.setText("Hello " + accRecInfo[2] + ","
+                    + "\n\nThis is the information of your account: "
+                    + "\nUsername: " + accRecInfo[0]
+                    + "\nPassword: " + accRecInfo[1]
                     + "\n\nIf you didn't want to recover your password or didn't request this, just ignore and delete this message. "
                     + "To keep your account secure, please don't forward this email to anyone."
                     + "\n\nBest regards,"

@@ -5,22 +5,14 @@
  */
 package Model;
 
-import static Model.AthleteMethods.fillTableAthlete;
-import static Model.AthleteMethods.updateAthlete;
 import com.mysql.jdbc.PreparedStatement;
 import com.mysql.jdbc.Statement;
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Year;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.logging.Level;
@@ -45,7 +37,7 @@ public class CoachMethods
         try
         {
             stmt = (Statement) cnt.getDBConnection().createStatement();
-            sqlQuery = "SELECT chPerID, perName, perSurname, perEmail, perPhoneNum FROM person JOIN coach ON perID = chPerID GROUP BY perName";
+            sqlQuery = "SELECT chPerID, perName, perSurname, perEmail, perPhoneNum FROM person JOIN coach ON perID = chPerID ORDER BY perName";
             rs = stmt.executeQuery(sqlQuery);
             
             while(rs.next())
@@ -82,7 +74,8 @@ public class CoachMethods
         int i;
         boolean result = false;
         DBConnection cnt = new DBConnection();
-        String sqlQuery;
+        String sqlQuery, chTmCode;
+        ResultSet rs;
         PreparedStatement ps = null;
         
         try
@@ -99,6 +92,13 @@ public class CoachMethods
 
             if(result == false)
             {
+                sqlQuery = "SELECT tmCode FROM team WHERE tmName = ?";
+                ps = (PreparedStatement) cnt.getDBConnection().prepareStatement(sqlQuery);
+                ps.setString(1, ch.getTeam());
+                rs = ps.executeQuery();
+                rs.next();
+                chTmCode = rs.getString("tmCode");
+                
                 sqlQuery = "INSERT INTO person VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 ps = (PreparedStatement) cnt.getDBConnection().prepareStatement(sqlQuery);
                 ps.setString(1, ch.getID());
@@ -113,7 +113,7 @@ public class CoachMethods
                 ps.setDate(8, sqlChBirthDate);
                 ps.setString(9, ch.getEmail());
                 ps.setInt(10, ch.getPhoneNum());
-                ps.setString(11, ch.getTeam());
+                ps.setString(11, chTmCode);
                 ps.executeUpdate();
                 
                 sqlQuery = "INSERT INTO coach VALUES (?, ?)";
@@ -196,7 +196,9 @@ public class CoachMethods
             ch.setHomeTown(rs.getString("perHomeTown"));
             ch.setAddress(rs.getString("perAddress"));
             ch.setNationality(rs.getString("perNationality"));
-            ch.setBirthDate(rs.getDate("perBirthDate").toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+            java.sql.Date sqlChBirthDate = rs.getDate("perBirthDate");
+            java.util.Date chBirthDate = new java.util.Date(sqlChBirthDate.getTime());
+            ch.setBirthDate(chBirthDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
             ch.setEmail(rs.getString("perEmail"));
             ch.setPhoneNum(rs.getInt("perPhoneNum"));
             ch.setTeam(rs.getString("perTeam"));
@@ -206,7 +208,7 @@ public class CoachMethods
             ps.setString(1, tableChID);
             rs = ps.executeQuery();
             rs.next();
-            ch.setStartYear(Year.parse(rs.getString("athFavDiscipline")));
+            ch.setStartYear(Year.parse(rs.getString("chStartYear"), DateTimeFormatter.ISO_DATE));
         }
         catch(SQLException ex)
         {
@@ -227,11 +229,19 @@ public class CoachMethods
     {
         // Define the variables
         DBConnection cnt = new DBConnection();
-        String sqlQuery;
+        String sqlQuery, chTmCode = null;
+        ResultSet rs;
         PreparedStatement ps = null;
         
         try
         {
+            sqlQuery = "SELECT tmCode FROM team WHERE tmName = ?";
+            ps = (PreparedStatement) cnt.getDBConnection().prepareStatement(sqlQuery);
+            ps.setString(1, ch.getTeam());
+            rs = ps.executeQuery();
+            rs.next();
+            chTmCode = rs.getString("tmCode");
+            
             sqlQuery = "UPDATE person SET perCountry = ?, perAddress = ?, perNationality = ?, perEmail = ?, perPhoneNum = ?, perTeam = ? WHERE perID = ?";
             ps = (PreparedStatement) cnt.getDBConnection().prepareStatement(sqlQuery);
             ps.setString(1, ch.getCountry());
@@ -239,7 +249,7 @@ public class CoachMethods
             ps.setString(3, ch.getNationality());
             ps.setString(4, ch.getEmail());
             ps.setInt(5, ch.getPhoneNum());
-            ps.setString(6, ch.getTeam());
+            ps.setString(6, chTmCode);
             ps.setString(7, ch.getID());
             ps.executeUpdate();
         }
@@ -268,7 +278,7 @@ public class CoachMethods
         {
             stmt = (Statement) cnt.getDBConnection().createStatement();
             sqlQuery = "SELECT chPerID, perName, perSurname, perEmail, perPhoneNum FROM person JOIN coach ON perID = chPerID "
-                    + "WHERE (perName LIKE '%" + search + "%') OR (perSurname LIKE '%" + search + "%') GROUP BY perName";
+                    + "WHERE (perName LIKE '%" + search + "%') OR (perSurname LIKE '%" + search + "%') ORDER BY perName";
             rs = stmt.executeQuery(sqlQuery);
             
             while(rs.next())
@@ -297,145 +307,37 @@ public class CoachMethods
         return alCh;
     }
     
-    
-    
-    
-    
-    
-    
-    public static void writeCoach(Coach ch) throws IOException
+    public static String getTeamNameCh(String chTmCode) throws IOException
     {
         // Define the variables
-        File chFl = new File("files/coach.ser");
+        DBConnection cnt = new DBConnection();
+        String sqlQuery, chTmName = null;
+        ResultSet rs;
+        PreparedStatement ps = null;
         
         try
         {
-            // If the file doesn't exist, create a new ObjectOutputStream to write the header
-            if(!chFl.exists())
-            {
-                FileOutputStream fs1 = new FileOutputStream(chFl);
-                ObjectOutputStream os1 = new ObjectOutputStream(fs1);
-                os1.close();
-            }
-
-            // Create another ObjectOutputStream without the header to be able to write objects without overwriting
-            FileOutputStream fs = new FileOutputStream(chFl, true);
-            ObjectOutputStream os = new ObjectOutputStream(fs)
-            {
-                @Override
-                protected void writeStreamHeader() throws IOException
-                {
-                    reset();
-                }
-            };
-            
-            // Write the object and close the file
-            os.writeObject(ch);
-            os.close();
-            fs.close();
+            sqlQuery = "SELECT tmName FROM team WHERE tmCode = ?";
+            ps = (PreparedStatement) cnt.getDBConnection().prepareStatement(sqlQuery);
+            ps.setString(1, chTmCode);
+            rs = ps.executeQuery();
+            rs.next();
+            chTmName = rs.getString("tmName");
         }
-        catch(FileNotFoundException ex)
+        catch(SQLException ex)
         {
-            System.out.println("File not found.");
-        }
-    }
-    
-    public static ArrayList <Coach> writeCoachArrayList() throws IOException
-    {
-        // Define the variables
-        File chFl = new File("files/coach.ser");
-        ArrayList <Coach> alCh = new ArrayList();
-        
-        try
-        {
-            FileInputStream fs = new FileInputStream(chFl);
-            ObjectInputStream os = new ObjectInputStream(fs);
-            
-            try
-            {
-                while(true)
-                {
-                    Coach ch = new Coach(false);
-                    ch = (Coach) os.readObject();
-                    alCh.add(ch);                    
-                }
-            }
-            catch(EOFException ex1)
-            {
-                fs.close();
-                os.close();
-            }
-        }
-        catch(IOException | ClassNotFoundException ex1)
-        {
-            
+            Logger.getLogger(DBConnection.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        return alCh;
-    }
-    
-    public static void writeChFileFromArrayList(ArrayList <Coach> alCh) throws IOException
-    {
-        // Define the variables
-        int i;
-        File chFl = new File("files/coach.ser");
-        
-        try
+        finally
         {
-            FileOutputStream fs = new FileOutputStream(chFl);
-            ObjectOutputStream os = new ObjectOutputStream(fs);
-
-            // Write the objects of the ArrayList and close the file
-            for(i = 0; i < alCh.size(); ++i)
+            if(ps != null)
             {
-                Coach ch = alCh.get(i);
-                os.writeObject(ch);
-            }
-            
-            os.close();
-            fs.close();
-        }
-        catch(FileNotFoundException ex)
-        {
-            System.out.println("File not found.");
-        }
-    }
-    
-    public static ArrayList <Coach> searchCoachArrayList(String search) throws IOException
-    {
-        // Define the variables
-        File chFl = new File("files/coach.ser");
-        ArrayList <Coach> alChSearch = new ArrayList();
-        
-        try
-        {
-            FileInputStream fs = new FileInputStream(chFl);
-            ObjectInputStream os = new ObjectInputStream(fs);
-            
-            try
-            {
-                while(true)
-                {
-                    Coach ch = new Coach(false);
-                    ch = (Coach) os.readObject();
-                    
-                    if(ch.getName().toLowerCase().contains(search) || ch.getSurname().toLowerCase().contains(search))
-                    {
-                        alChSearch.add(ch); 
-                    }                
-                }
-            }
-            catch(EOFException ex1)
-            {
-                fs.close();
-                os.close();
-            }
-        }
-        catch(IOException | ClassNotFoundException ex1)
-        {
-            
+                try { ps.close(); } catch (SQLException e) { /* ignored */ }
+            } 
+            try { cnt.disconnect(); } catch (Exception e) { /* ignored */ }
         }
         
-        return alChSearch;
+        return chTmName;
     }
 }

@@ -33,7 +33,7 @@ public class TrackAndField
     private ResultMethods rsMeth;
     private ScheduleMethods schMeth;
     private TeamMethods tmMeth;
-    private PasswordGenerator passwdGen;
+    private LoginMethods passwdGen;
     private SendMailMethods sendMailMeth;
     
     // Define the view members
@@ -96,7 +96,7 @@ public class TrackAndField
         rsMeth = new ResultMethods();
         schMeth = new ScheduleMethods();
         tmMeth = new TeamMethods();
-        passwdGen = new PasswordGenerator();
+        passwdGen = new LoginMethods();
         sendMailMeth = new SendMailMethods();
         
         // Initialize the view members

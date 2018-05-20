@@ -40,6 +40,8 @@ public class addChangeSchedule extends javax.swing.JFrame {
         jLabel_exit = new javax.swing.JLabel();
         jLabel_minimize = new javax.swing.JLabel();
         jLabel_viewTitle = new javax.swing.JLabel();
+        jLabel_hyphen = new javax.swing.JLabel();
+        jLabel_schCode = new javax.swing.JLabel();
         jButton_save = new javax.swing.JButton();
         jButton_reset = new javax.swing.JButton();
         jComboBox_competition = new javax.swing.JComboBox<>();
@@ -116,7 +118,17 @@ public class addChangeSchedule extends javax.swing.JFrame {
         jLabel_viewTitle.setFont(new java.awt.Font("Century Gothic", 1, 14)); // NOI18N
         jLabel_viewTitle.setForeground(new java.awt.Color(210, 87, 34));
         jLabel_viewTitle.setText("SCHEDULE");
-        jPanel_header.add(jLabel_viewTitle, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 10, 280, 30));
+        jPanel_header.add(jLabel_viewTitle, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 10, 80, 30));
+
+        jLabel_hyphen.setFont(new java.awt.Font("Century Gothic", 1, 14)); // NOI18N
+        jLabel_hyphen.setForeground(new java.awt.Color(210, 87, 34));
+        jLabel_hyphen.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel_hyphen.setText("-");
+        jPanel_header.add(jLabel_hyphen, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 10, 30, 30));
+
+        jLabel_schCode.setFont(new java.awt.Font("Century Gothic", 1, 14)); // NOI18N
+        jLabel_schCode.setForeground(new java.awt.Color(210, 87, 34));
+        jPanel_header.add(jLabel_schCode, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 10, 70, 30));
 
         jPanel1.add(jPanel_header, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 480, 50));
 
@@ -208,8 +220,10 @@ public class addChangeSchedule extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel_discipline;
     private javax.swing.JLabel jLabel_exit;
     private javax.swing.JLabel jLabel_gender;
+    public javax.swing.JLabel jLabel_hyphen;
     private javax.swing.JLabel jLabel_minimize;
     private javax.swing.JLabel jLabel_round;
+    public javax.swing.JLabel jLabel_schCode;
     private javax.swing.JLabel jLabel_viewTitle;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel_header;

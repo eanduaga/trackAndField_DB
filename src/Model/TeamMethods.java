@@ -220,7 +220,7 @@ public class TeamMethods
         try
         {
             stmt = (Statement) cnt.getDBConnection().createStatement();
-            sqlQuery = "SELECT * FROM team WHERE tmName LIKE '%" + search + "%' GROUP BY tmName";
+            sqlQuery = "SELECT * FROM team WHERE (tmName LIKE '%" + search + "%') OR (tmCountry LIKE '%" + search + "%') OR (tmTown LIKE '%" + search + "%') ORDER BY tmName";
             rs = stmt.executeQuery(sqlQuery);
             
             while(rs.next())

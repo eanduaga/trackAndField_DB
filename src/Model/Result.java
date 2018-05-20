@@ -14,6 +14,7 @@ package Model;
 // Import the libraries
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.Random;
 
 public class Result implements Serializable
@@ -27,7 +28,7 @@ public class Result implements Serializable
     private String round;
     private float time;
     private int position;
-    private LocalDate rDate;
+    private Date rDate;
     
     // Define the constructor
     public Result(boolean bl)
@@ -103,7 +104,7 @@ public class Result implements Serializable
         position = ResultPosition;
     }
 
-    public void setDate(LocalDate ResultDate)
+    public void setDate(Date ResultDate)
     {
         rDate = ResultDate;
     }  
@@ -149,7 +150,7 @@ public class Result implements Serializable
         return position;
     }
 
-    public LocalDate getDate()
+    public Date getDate()
     {
         return rDate;
     } 

@@ -35,7 +35,7 @@ public class AthleteMethods
         try
         {
             stmt = (Statement) cnt.getDBConnection().createStatement();
-            sqlQuery = "SELECT athPerID, perName, perSurname, perEmail, perPhoneNum FROM person JOIN athlete ON perID = athPerID GROUP BY perName";
+            sqlQuery = "SELECT athPerID, perName, perSurname, perEmail, perPhoneNum FROM person JOIN athlete ON perID = athPerID ORDER BY perName";
             rs = stmt.executeQuery(sqlQuery);
             
             while(rs.next())
@@ -73,7 +73,7 @@ public class AthleteMethods
         boolean result = false;
         DBConnection cnt = new DBConnection();
         String sqlQuery, athTmCode;
-        ResultSet rs;
+        ResultSet rs = null;
         PreparedStatement ps = null;
         
         try
@@ -135,6 +135,10 @@ public class AthleteMethods
         
         finally
         {
+            if(rs != null)
+            {
+                try { rs.close(); } catch (SQLException e) { /* ignored */ }
+            }
             if(ps != null)
             {
                 try { ps.close(); } catch (SQLException e) { /* ignored */ }
@@ -223,7 +227,10 @@ public class AthleteMethods
         
         finally
         {
-            try { rs.close(); } catch (SQLException e) { /* ignored */ }
+            if(rs != null)
+            {
+                try { rs.close(); } catch (SQLException e) { /* ignored */ }
+            }
             try { ps.close(); } catch (SQLException e) { /* ignored */ }
             try { cnt.disconnect(); } catch (Exception e) { /* ignored */ }
         }
@@ -236,7 +243,7 @@ public class AthleteMethods
         // Define the variables
         DBConnection cnt = new DBConnection();
         String sqlQuery, athTmCode = null;
-        ResultSet rs;
+        ResultSet rs = null;
         PreparedStatement ps = null;
         
         try
@@ -275,6 +282,10 @@ public class AthleteMethods
         
         finally
         {
+            if(rs != null)
+            {
+                try { rs.close(); } catch (SQLException e) { /* ignored */ }
+            }
             try { ps.close(); } catch (SQLException e) { /* ignored */ }
             try { cnt.disconnect(); } catch (Exception e) { /* ignored */ }
         }
@@ -293,7 +304,7 @@ public class AthleteMethods
         {
             stmt = (Statement) cnt.getDBConnection().createStatement();
             sqlQuery = "SELECT athPerID, perName, perSurname, perEmail, perPhoneNum FROM person JOIN athlete ON perID = athPerID "
-                    + "WHERE (perName LIKE '%" + search + "%') OR (perSurname LIKE '%" + search + "%') GROUP BY perName";
+                    + "WHERE (perName LIKE '%" + search + "%') OR (perSurname LIKE '%" + search + "%') ORDER BY perName";
             rs = stmt.executeQuery(sqlQuery);
             
             while(rs.next())
@@ -330,7 +341,7 @@ public class AthleteMethods
         // Define the variables
         DBConnection cnt = new DBConnection();
         String sqlQuery, athTmName = null;
-        ResultSet rs;
+        ResultSet rs = null;
         PreparedStatement ps = null;
         
         try
@@ -349,6 +360,10 @@ public class AthleteMethods
         
         finally
         {
+            if(rs != null)
+            {
+                try { rs.close(); } catch (SQLException e) { /* ignored */ }
+            }
             if(ps != null)
             {
                 try { ps.close(); } catch (SQLException e) { /* ignored */ }

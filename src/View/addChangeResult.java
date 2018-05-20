@@ -38,6 +38,8 @@ public class addChangeResult extends javax.swing.JFrame {
         jLabel_exit = new javax.swing.JLabel();
         jLabel_minimize = new javax.swing.JLabel();
         jLabel_viewTitle = new javax.swing.JLabel();
+        jLabel_hyphen = new javax.swing.JLabel();
+        jLabel_rsCode = new javax.swing.JLabel();
         jButton_save = new javax.swing.JButton();
         jButton_reset = new javax.swing.JButton();
         jLabel_time = new javax.swing.JLabel();
@@ -119,7 +121,17 @@ public class addChangeResult extends javax.swing.JFrame {
         jLabel_viewTitle.setFont(new java.awt.Font("Century Gothic", 1, 14)); // NOI18N
         jLabel_viewTitle.setForeground(new java.awt.Color(210, 87, 34));
         jLabel_viewTitle.setText("RESULT");
-        jPanel_header.add(jLabel_viewTitle, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 10, 280, 30));
+        jPanel_header.add(jLabel_viewTitle, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 10, 50, 30));
+
+        jLabel_hyphen.setFont(new java.awt.Font("Century Gothic", 1, 14)); // NOI18N
+        jLabel_hyphen.setForeground(new java.awt.Color(210, 87, 34));
+        jLabel_hyphen.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel_hyphen.setText("-");
+        jPanel_header.add(jLabel_hyphen, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 10, 30, 30));
+
+        jLabel_rsCode.setFont(new java.awt.Font("Century Gothic", 1, 14)); // NOI18N
+        jLabel_rsCode.setForeground(new java.awt.Color(210, 87, 34));
+        jPanel_header.add(jLabel_rsCode, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 10, 70, 30));
 
         jPanel_addAthlete.add(jPanel_header, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 890, 50));
 
@@ -135,6 +147,11 @@ public class addChangeResult extends javax.swing.JFrame {
         jButton_reset.setForeground(new java.awt.Color(52, 50, 46));
         jButton_reset.setText("RESET");
         jButton_reset.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jButton_reset.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton_resetActionPerformed(evt);
+            }
+        });
         jPanel_addAthlete.add(jButton_reset, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 570, 140, 50));
 
         jLabel_time.setFont(new java.awt.Font("Century Gothic", 1, 18)); // NOI18N
@@ -200,7 +217,7 @@ public class addChangeResult extends javax.swing.JFrame {
 
         jComboBox_round.setFont(new java.awt.Font("Century Gothic", 0, 14)); // NOI18N
         jComboBox_round.setForeground(new java.awt.Color(52, 50, 46));
-        jComboBox_round.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "First Round", "Second Round", "Semi Finals", "Finals" }));
+        jComboBox_round.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "First Round", "Second Round", "Semi Finals", "Final" }));
         jComboBox_round.setToolTipText("");
         jPanel_addAthlete.add(jComboBox_round, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 350, 300, 30));
 
@@ -282,6 +299,17 @@ public class addChangeResult extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jTextField_positionFocusLost
 
+    private void jButton_resetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_resetActionPerformed
+        jTextField_position.setText("Enter the position");
+        jTextField_time.setText("Enter the time");
+        jComboBox_athlete.setSelectedIndex(0);
+        jComboBox_competition.setSelectedIndex(0);
+        jComboBox_discipline.setSelectedIndex(0);
+        jComboBox_round.setSelectedIndex(0);
+        jComboBox_gender.setSelectedIndex(0);
+        jXDatePicker_rsDate.setDate(null);
+    }//GEN-LAST:event_jButton_resetActionPerformed
+
     int xMouse;
     int yMouse;
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -297,9 +325,11 @@ public class addChangeResult extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel_discipline;
     private javax.swing.JLabel jLabel_exit;
     private javax.swing.JLabel jLabel_gender;
+    public javax.swing.JLabel jLabel_hyphen;
     private javax.swing.JLabel jLabel_minimize;
     private javax.swing.JLabel jLabel_position;
     private javax.swing.JLabel jLabel_round;
+    public javax.swing.JLabel jLabel_rsCode;
     private javax.swing.JLabel jLabel_rsDate;
     private javax.swing.JLabel jLabel_time;
     private javax.swing.JLabel jLabel_viewTitle;
