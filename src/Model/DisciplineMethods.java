@@ -11,20 +11,15 @@ package Model;
  */
 
 // Import the libraries
+import com.mysql.jdbc.PreparedStatement;
 import com.mysql.jdbc.Statement;
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 public class DisciplineMethods
 {
@@ -71,147 +66,201 @@ public class DisciplineMethods
         return alDis;
     }
     
-    
-    
-    
-    
-    
-    
-    
-    
-    public static void writeDiscipline(Discipline dis) throws IOException
+    public static void insertDiscipline(Discipline dis) throws IOException
     {
         // Define the variables
-        File disFl = new File("files/discipline.ser");
-        
-        try
-        {
-            // If the file doesn't exist, create a new ObjectOutputStream to write the header
-            if(!disFl.exists())
-            {
-                FileOutputStream fs1 = new FileOutputStream(disFl);
-                ObjectOutputStream os1 = new ObjectOutputStream(fs1);
-                os1.close();
-            }
-
-            // Create another ObjectOutputStream without the header to be able to write objects without overwriting
-            FileOutputStream fs = new FileOutputStream(disFl, true);
-            ObjectOutputStream os = new ObjectOutputStream(fs)
-            {
-                @Override
-                protected void writeStreamHeader() throws IOException
-                {
-                    reset();
-                }
-            };
-            
-            // Write the object and close the file
-            os.writeObject(dis);
-            os.close();
-            fs.close();
-        }
-        catch(FileNotFoundException ex)
-        {
-            System.out.println("File not found.");
-        }
-    }
-    
-    public static ArrayList <Discipline> writeDisciplineArrayList() throws IOException
-    {
-        // Define the variables
-        File disFl = new File("files/discipline.ser");
         ArrayList <Discipline> alDis = new ArrayList();
-        
-        try
-        {
-            FileInputStream fs = new FileInputStream(disFl);
-            ObjectInputStream os = new ObjectInputStream(fs);
-            
-            try
-            {
-                while(true)
-                {
-                    Discipline dis = new Discipline(false);
-                    dis = (Discipline) os.readObject();
-                    alDis.add(dis);                    
-                }
-            }
-            catch(EOFException ex1)
-            {
-                fs.close();
-                os.close();
-            }
-        }
-        catch(IOException | ClassNotFoundException ex1)
-        {
-            
-        }
-        
-        return alDis;
-    }
-    
-    public static void writeDisFileFromArrayList(ArrayList <Discipline> alDis) throws IOException
-    {
-        // Define the variables
+        Discipline displ = new Discipline(false);
         int i;
-        File disFl = new File("files/discipline.ser");
+        boolean result = false;
+        float[] wr = new float[2];
+        DBConnection cnt = new DBConnection();
+        String sqlQuery;
+        PreparedStatement ps = null;
         
         try
         {
-            FileOutputStream fs = new FileOutputStream(disFl);
-            ObjectOutputStream os = new ObjectOutputStream(fs);
-
-            // Write the objects of the ArrayList and close the file
-            for(i = 0; i < alDis.size(); ++i)
+            alDis = fillTableDiscipline();
+            for(i = 0; i <alDis.size(); ++i)
             {
-                Discipline dis = alDis.get(i);
-                os.writeObject(dis);
+                displ = alDis.get(i);
+                if(dis.getCode().equals(displ.getCode()))
+                {
+                    result = true;
+                }
             }
-            
-            os.close();
-            fs.close();
+
+            if(result == false)
+            {
+                sqlQuery = "INSERT INTO discipline VALUES (?, ?, ?, ?, ?)";
+                ps = (PreparedStatement) cnt.getDBConnection().prepareStatement(sqlQuery);
+                ps.setString(1, dis.getCode());
+                ps.setString(2, dis.getName());
+                ps.setString(3, dis.getDescription());
+                wr = dis.getWorldRecord();
+                ps.setFloat(4, wr[0]);
+                ps.setFloat(5, wr[1]);
+                ps.executeUpdate();
+            }
+            else
+            {
+                updateDiscipline(dis);
+            }
         }
-        catch(FileNotFoundException ex)
+        catch(SQLException ex)
         {
-            System.out.println("File not found.");
+            Logger.getLogger(DBConnection.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        finally
+        {
+            if(ps != null)
+            {
+                try { ps.close(); } catch (SQLException e) { /* ignored */ }
+            } 
+            try { cnt.disconnect(); } catch (Exception e) { /* ignored */ }
         }
     }
     
-    public static ArrayList <Discipline> searchDisciplineArrayList(String search) throws IOException
+    public static void deleteDiscipline(String tableDisCode) throws IOException
     {
         // Define the variables
-        File disFl = new File("files/discipline.ser");
-        ArrayList <Discipline> alDisSearch = new ArrayList();
+        DBConnection cnt = new DBConnection();
+        String sqlQuery;
+        PreparedStatement ps = null;
         
         try
         {
-            FileInputStream fs = new FileInputStream(disFl);
-            ObjectInputStream os = new ObjectInputStream(fs);
-            
-            try
-            {
-                while(true)
-                {
-                    Discipline dis = new Discipline(false);
-                    dis = (Discipline) os.readObject();
-                    
-                    if(dis.getName().toLowerCase().contains(search))
-                    {
-                        alDisSearch.add(dis); 
-                    }                
-                }
-            }
-            catch(EOFException ex1)
-            {
-                fs.close();
-                os.close();
-            }
+            sqlQuery = "DELETE FROM discipline WHERE disCode = ?";
+            ps = (PreparedStatement) cnt.getDBConnection().prepareStatement(sqlQuery);
+            ps.setString(1, tableDisCode);
+            ps.executeUpdate();
         }
-        catch(IOException | ClassNotFoundException ex1)
+        catch(SQLException ex)
         {
-            
+            // MySQLIntegrityConstraintViolationException
+            JOptionPane.showMessageDialog(null, "The information of the discipline you are trying to remove is on the sections result or schedule. "
+                    + "Please, check those records before deleting the discipline.", "Dependency error", JOptionPane.ERROR_MESSAGE);
         }
         
-        return alDisSearch;
+        finally
+        {
+            try { ps.close(); } catch (SQLException e) { /* ignored */ }
+            try { cnt.disconnect(); } catch (Exception e) { /* ignored */ }
+        }
+    }
+    
+    public static Discipline showUpdateViewDiscipline(String tableDisCode) throws IOException
+    {
+        // Define the variables
+        Discipline dis = new Discipline(false);
+        DBConnection cnt = new DBConnection();
+        String sqlQuery;
+        float[] wr = new float[2];
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+        
+        try
+        {
+            sqlQuery = "SELECT * FROM discipline WHERE disCode = ?";
+            ps = (PreparedStatement) cnt.getDBConnection().prepareStatement(sqlQuery);
+            ps.setString(1, tableDisCode);
+            rs = ps.executeQuery();
+            rs.next();
+            dis.setCode(rs.getString("disCode"));
+            dis.setName(rs.getString("disName"));
+            dis.setDescription(rs.getString("disDescription"));
+            wr[0] = rs.getFloat("disMaleWR");
+            wr[1] = rs.getFloat("disFemaleWR");
+            dis.setWorldRecord(wr);
+        }
+        catch(SQLException ex)
+        {
+            Logger.getLogger(DBConnection.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        finally
+        {
+            try { rs.close(); } catch (SQLException e) { /* ignored */ }
+            try { ps.close(); } catch (SQLException e) { /* ignored */ }
+            try { cnt.disconnect(); } catch (Exception e) { /* ignored */ }
+        }
+        
+        return dis;
+    }
+    
+    public static void updateDiscipline(Discipline dis) throws IOException
+    {
+        // Define the variables
+        DBConnection cnt = new DBConnection();
+        String sqlQuery;
+        float[] wr = new float[2];
+        PreparedStatement ps = null;
+        
+        try
+        {
+            sqlQuery = "UPDATE discipline SET disMaleWR = ?, disFemaleWR = ? WHERE disCode = ?";
+            ps = (PreparedStatement) cnt.getDBConnection().prepareStatement(sqlQuery);
+            wr = dis.getWorldRecord();
+            ps.setFloat(1, wr[0]);
+            ps.setFloat(2, wr[1]);
+            ps.setString(4, dis.getCode());
+            ps.executeUpdate();
+        }
+        catch(SQLException ex)
+        {
+            Logger.getLogger(DBConnection.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        finally
+        {
+            try { ps.close(); } catch (SQLException e) { /* ignored */ }
+            try { cnt.disconnect(); } catch (Exception e) { /* ignored */ }
+        }
+    }
+    
+    public static ArrayList <Discipline> searchDiscipline(String search) throws IOException
+    {
+        // Define the variables
+        ArrayList <Discipline> alDis = new ArrayList();
+        DBConnection cnt = new DBConnection();
+        String sqlQuery;
+        float[] wr = new float[2];
+        Statement stmt = null;
+        ResultSet rs = null;
+        
+        try
+        {
+            stmt = (Statement) cnt.getDBConnection().createStatement();
+            sqlQuery = "SELECT * FROM discipline "
+                    + "WHERE (disName LIKE '%" + search + "%') OR (disDescription LIKE '%" + search + "%') "
+                    + "ORDER BY disName";
+            rs = stmt.executeQuery(sqlQuery);
+            
+            while(rs.next())
+            {
+                Discipline dis = new Discipline(false);
+                dis.setCode(rs.getString("disCode"));
+                dis.setName(rs.getString("disName"));
+                dis.setDescription(rs.getString("disDescription"));
+                wr[0] = rs.getFloat("disMaleWR");
+                wr[1] = rs.getFloat("disFemaleWR");
+                dis.setWorldRecord(wr);
+                alDis.add(dis);
+            }
+        }
+        catch(SQLException ex)
+        {
+            // JOptionPane.showMessageDialog(null, "Error, no se conecto");
+        }
+        
+        finally
+        {
+            try { rs.close(); } catch (SQLException e) { /* ignored */ }
+            try { stmt.close(); } catch (SQLException e) { /* ignored */ }
+            try { cnt.disconnect(); } catch (Exception e) { /* ignored */ }
+        }
+
+        return alDis;
     }
 }

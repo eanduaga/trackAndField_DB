@@ -14,7 +14,6 @@ package Model;
 // Import the libraries
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.Random;
 
 public class Competition implements Serializable
@@ -24,8 +23,8 @@ public class Competition implements Serializable
     private String name;
     private String description;
     private String location;
-    private Date startDate;
-    private Date endDate;
+    private LocalDate startDate;
+    private LocalDate endDate;
     
     // Define the constructor
     public Competition(boolean bl)
@@ -81,12 +80,12 @@ public class Competition implements Serializable
         location = CompetitionLocation;
     }
     
-    public void setStartDate(Date CompetitionStartDate)
+    public void setStartDate(LocalDate CompetitionStartDate)
     {
         startDate = CompetitionStartDate;
     }
     
-    public void setEndDate(Date CompetitionEndDate)
+    public void setEndDate(LocalDate CompetitionEndDate)
     {
         endDate = CompetitionEndDate;
     }
@@ -112,12 +111,12 @@ public class Competition implements Serializable
         return location;
     }
     
-    public Date getStartDate()
+    public LocalDate getStartDate()
     {
         return startDate;
     }
     
-    public Date getEndDate()
+    public LocalDate getEndDate()
     {
         return endDate;
     }

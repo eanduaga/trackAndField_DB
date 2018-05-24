@@ -20,7 +20,6 @@ public class TrackAndField
     Coach chModel;
     Competition compModel;
     Discipline disModel;
-    // Person perModel;
     Registration regModel;
     Result rsModel;
     Schedule schModel;
@@ -66,6 +65,7 @@ public class TrackAndField
     private showOneRs shOneRs;
     private showOneSch shOneSch;
     private showOneTm shOneTm;
+    private deletePane dltPane;
     
     // Define the controller
     TrackAndFieldController ctrl;
@@ -129,11 +129,12 @@ public class TrackAndField
         shOneRs = new showOneRs();
         shOneSch = new showOneSch();
         shOneTm = new showOneTm();
+        dltPane = new deletePane();
         
-        ctrl = new TrackAndFieldController(athModel, chModel, compModel, disModel, /*perModel,*/ regModel, rsModel, schModel, tmModel, 
+        ctrl = new TrackAndFieldController(athModel, chModel, compModel, disModel, regModel, rsModel, schModel, tmModel, 
         athMeth, chMeth, compMeth, disMeth, regMeth, rsMeth, schMeth, tmMeth, passwdGen, sendMailMeth, loginMenu, newAccView, accRecovery, mainPage, 
         mpGuest, addAthView, addChView, addCompView, addDisView, addRegView, addRsView, addSchView, addTmView, mgAthView, mgChView, mgCompView, 
-        mgDisView, mgRegView, mgRsView, mgSchView, mgTmView, shOneAth, shOneCh, shOneComp, shOneDis, shOneReg, shOneRs, shOneSch, shOneTm);
+        mgDisView, mgRegView, mgRsView, mgSchView, mgTmView, shOneAth, shOneCh, shOneComp, shOneDis, shOneReg, shOneRs, shOneSch, shOneTm, dltPane);
         
         loginMenu.setVisible(true);
     }

@@ -5,18 +5,9 @@
  */
 package Model;
 
-import static Model.AthleteMethods.fillTableAthlete;
-import static Model.AthleteMethods.updateAthlete;
 import com.mysql.jdbc.PreparedStatement;
 import com.mysql.jdbc.Statement;
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.ZoneId;
@@ -24,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JOptionPane;
 
 /**
  *
@@ -37,7 +27,6 @@ public class ResultMethods
         // Define the variables
         ArrayList <Result> alRs = new ArrayList();
         String sqlQuery;
-        int i;
         DBConnection cnt = new DBConnection();
         Statement stmt = null;
         ResultSet rss = null;
@@ -60,7 +49,9 @@ public class ResultMethods
                 rs.setRound(rss.getString("rsRound"));
                 rs.setTime(rss.getFloat("rsTime"));
                 rs.setPosition(rss.getInt("rsPosition"));
-                rs.setDate(rss.getDate("rsDate"));
+                java.sql.Date sqlRsDate = rss.getDate("rsDate");
+                java.util.Date rsDate = new java.util.Date(sqlRsDate.getTime());
+                rs.setDate(rsDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
                 rs.setDiscipline(rss.getString("disName"));
                 rs.setCompetition(rss.getString("compName"));
                 rs.setAthlete(rss.getString("athName"));
@@ -143,7 +134,7 @@ public class ResultMethods
                 ps.setString(3, rs.getRound());
                 ps.setFloat(4, rs.getTime());
                 ps.setInt(5, rs.getPosition());
-                java.util.Date rsDate = rs.getDate();
+                java.util.Date rsDate = Date.from(rs.getDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
                 java.sql.Date sqlRsDate = new java.sql.Date(rsDate.getTime());
                 ps.setDate(6, sqlRsDate);
                 ps.setString(7, rsDisCode);
@@ -225,7 +216,7 @@ public class ResultMethods
             rs.setPosition(rss.getInt("rsPosition"));
             java.sql.Date sqlRsDate = rss.getDate("rsDate");
             java.util.Date rsDate = new java.util.Date(sqlRsDate.getTime());
-            rs.setDate(rsDate);
+            rs.setDate(rsDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
             rs.setDiscipline(rss.getString("rsDiscipline"));
             rs.setCompetition(rss.getString("rsCompetition"));
             rs.setAthlete(rss.getString("rsAthlete"));
@@ -289,7 +280,7 @@ public class ResultMethods
             ps.setString(2, rs.getRound());
             ps.setFloat(3, rs.getTime());
             ps.setInt(4, rs.getPosition());
-            java.util.Date rsDate = rs.getDate();
+            java.util.Date rsDate = Date.from(rs.getDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
             java.sql.Date sqlRsDate = new java.sql.Date(rsDate.getTime());
             ps.setDate(5, sqlRsDate);
             ps.setString(6, rsDisCode);
@@ -330,7 +321,7 @@ public class ResultMethods
                     + "FROM (((discipline dis JOIN result rs ON dis.disCode = rs.rsDiscipline) JOIN competition comp ON rs.rsCompetition = comp.compCode) "
                     + "JOIN athlete ath ON rs.rsAthlete = ath.athPerID) JOIN person per ON ath.athPerID = per.perID "
                     + "HAVING (rsDate LIKE '%" + search + "%') OR (athName LIKE '%" + search + "%') OR (disName LIKE '%" + search + "%') "
-                    + "OR (compName LIKE '%" + search + "%') OR (rsRound LIKE '%" + search + "%') ORDER BY rsDate;";
+                    + "OR (compName LIKE '%" + search + "%') OR (rsRound LIKE '%" + search + "%') ORDER BY rsDate";
             rss = stmt.executeQuery(sqlQuery);
             
             while(rss.next())
@@ -343,7 +334,7 @@ public class ResultMethods
                 rs.setPosition(rss.getInt("rsPosition"));
                 java.sql.Date sqlRsDate = rss.getDate("rsDate");
                 java.util.Date rsDate = new java.util.Date(sqlRsDate.getTime());
-                rs.setDate(rsDate);
+                rs.setDate(rsDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
                 rs.setDiscipline(rss.getString("disName"));
                 rs.setCompetition(rss.getString("compName"));
                 rs.setAthlete(rss.getString("athName"));

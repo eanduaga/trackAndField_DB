@@ -169,7 +169,7 @@ public class AthleteMethods
         catch(SQLException ex)
         {
             // MySQLIntegrityConstraintViolationException
-            JOptionPane.showMessageDialog(null, "The information of the athlete you are trying to remove is on the sections result, schedule or "
+            JOptionPane.showMessageDialog(null, "The information of the athlete you are trying to remove is on the sections result or "
                     + "registration. Please, check those records before deleting the athlete.", "Dependency error", JOptionPane.ERROR_MESSAGE);
         }
         

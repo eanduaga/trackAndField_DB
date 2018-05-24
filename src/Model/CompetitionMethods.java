@@ -5,20 +5,17 @@
  */
 package Model;
 
+import com.mysql.jdbc.PreparedStatement;
 import com.mysql.jdbc.Statement;
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -48,8 +45,12 @@ public class CompetitionMethods
                 comp.setName(rs.getString("compName"));
                 comp.setDescription(rs.getString("compDescription"));
                 comp.setLocation(rs.getString("compLocation"));
-                comp.setStartDate(rs.getDate("compStartDate"));
-                comp.setEndDate(rs.getDate("compEndDate"));
+                java.sql.Date sqlCompStartDate = rs.getDate("compStartDate");
+                java.util.Date compStartDate = new java.util.Date(sqlCompStartDate.getTime());
+                comp.setStartDate(compStartDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+                java.sql.Date sqlCompEndDate = rs.getDate("compStartDate");
+                java.util.Date compEndDate = new java.util.Date(sqlCompEndDate.getTime());
+                comp.setEndDate(compEndDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
                 alComp.add(comp);
             }
         }
@@ -68,148 +69,215 @@ public class CompetitionMethods
         return alComp;
     }
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    public static void writeCompetition(Competition cmp) throws IOException
+    public static void insertCompetition(Competition comp) throws IOException
     {
         // Define the variables
-        File cmpFl = new File("files/competition.ser");
-        
-        try
-        {
-            // If the file doesn't exist, create a new ObjectOutputStream to write the header
-            if(!cmpFl.exists())
-            {
-                FileOutputStream fs1 = new FileOutputStream(cmpFl);
-                ObjectOutputStream os1 = new ObjectOutputStream(fs1);
-                os1.close();
-            }
-
-            // Create another ObjectOutputStream without the header to be able to write objects without overwriting
-            FileOutputStream fs = new FileOutputStream(cmpFl, true);
-            ObjectOutputStream os = new ObjectOutputStream(fs)
-            {
-                @Override
-                protected void writeStreamHeader() throws IOException
-                {
-                    reset();
-                }
-            };
-            
-            // Write the object and close the file
-            os.writeObject(cmp);
-            os.close();
-            fs.close();
-        }
-        catch(FileNotFoundException ex)
-        {
-            System.out.println("File not found.");
-        }
-    }
-    
-    public static ArrayList <Competition> writeCompetitionArrayList() throws IOException
-    {
-        // Define the variables
-        File compFl = new File("files/competition.ser");
         ArrayList <Competition> alComp = new ArrayList();
-        
-        try
-        {
-            FileInputStream fs = new FileInputStream(compFl);
-            ObjectInputStream os = new ObjectInputStream(fs);
-            
-            try
-            {
-                while(true)
-                {
-                    Competition comp = new Competition(false);
-                    comp = (Competition) os.readObject();
-                    alComp.add(comp);                    
-                }
-            }
-            catch(EOFException ex1)
-            {
-                fs.close();
-                os.close();
-            }
-        }
-        catch(IOException | ClassNotFoundException ex1)
-        {
-            
-        }
-        
-        return alComp;
-    }
-    
-    public static void writeCompFileFromArrayList(ArrayList <Competition> alComp) throws IOException
-    {
-        // Define the variables
+        Competition cmpt = new Competition(false);
         int i;
-        File cmpFl = new File("files/competition.ser");
+        boolean result = false;
+        DBConnection cnt = new DBConnection();
+        String sqlQuery;
+        PreparedStatement ps = null;
         
         try
         {
-            FileOutputStream fs = new FileOutputStream(cmpFl);
-            ObjectOutputStream os = new ObjectOutputStream(fs);
-
-            // Write the objects of the ArrayList and close the file
-            for(i = 0; i < alComp.size(); ++i)
+            alComp = fillTableCompetition();
+            for(i = 0; i <alComp.size(); ++i)
             {
-                Competition comp = alComp.get(i);
-                os.writeObject(comp);
+                cmpt = alComp.get(i);
+                if(comp.getCode().equals(cmpt.getCode()))
+                {
+                    result = true;
+                }
             }
-            
-            os.close();
-            fs.close();
+
+            if(result == false)
+            {
+                sqlQuery = "INSERT INTO competition VALUES (?, ?, ?, ?, ?, ?)";
+                ps = (PreparedStatement) cnt.getDBConnection().prepareStatement(sqlQuery);
+                ps.setString(1, comp.getCode());
+                ps.setString(2, comp.getName());
+                ps.setString(3, comp.getDescription());
+                ps.setString(4, comp.getLocation());
+                java.util.Date compStartDate = Date.from(comp.getStartDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
+                java.sql.Date sqlCompStartDate = new java.sql.Date(compStartDate.getTime());
+                ps.setDate(5, sqlCompStartDate);
+                java.util.Date compEndDate = Date.from(comp.getStartDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
+                java.sql.Date sqlCompEndDate = new java.sql.Date(compEndDate.getTime());
+                ps.setDate(6, sqlCompEndDate);
+                ps.executeUpdate();
+            }
+            else
+            {
+                updateCompetition(comp);
+            }
         }
-        catch(FileNotFoundException ex)
+        catch(SQLException ex)
         {
-            System.out.println("File not found.");
+            Logger.getLogger(DBConnection.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        finally
+        {
+            if(ps != null)
+            {
+                try { ps.close(); } catch (SQLException e) { /* ignored */ }
+            } 
+            try { cnt.disconnect(); } catch (Exception e) { /* ignored */ }
         }
     }
     
-    public static ArrayList <Competition> searchCompetitionArrayList(String search) throws IOException
+    public static void deleteCompetition(String tableCompCode) throws IOException
     {
         // Define the variables
-        File compFl = new File("files/competition.ser");
-        ArrayList <Competition> alCompSearch = new ArrayList();
+        DBConnection cnt = new DBConnection();
+        String sqlQuery;
+        PreparedStatement ps = null;
         
         try
         {
-            FileInputStream fs = new FileInputStream(compFl);
-            ObjectInputStream os = new ObjectInputStream(fs);
-            
-            try
-            {
-                while(true)
-                {
-                    Competition comp = new Competition(false);
-                    comp = (Competition) os.readObject();
-                    
-                    if(comp.getName().toLowerCase().contains(search))
-                    {
-                        alCompSearch.add(comp); 
-                    }                
-                }
-            }
-            catch(EOFException ex1)
-            {
-                fs.close();
-                os.close();
-            }
+            sqlQuery = "DELETE FROM competition WHERE compCode = ?";
+            ps = (PreparedStatement) cnt.getDBConnection().prepareStatement(sqlQuery);
+            ps.setString(1, tableCompCode);
+            ps.executeUpdate();
         }
-        catch(IOException | ClassNotFoundException ex1)
+        catch(SQLException ex)
         {
-            
+            // MySQLIntegrityConstraintViolationException
+            JOptionPane.showMessageDialog(null, "The information of the competition you are trying to remove is on the sections result, schedule or "
+                    + "registration. Please, check those records before deleting the competition.", "Dependency error", JOptionPane.ERROR_MESSAGE);
         }
         
-        return alCompSearch;
+        finally
+        {
+            try { ps.close(); } catch (SQLException e) { /* ignored */ }
+            try { cnt.disconnect(); } catch (Exception e) { /* ignored */ }
+        }
+    }
+    
+    public static Competition showUpdateViewCompetition(String tableCompCode) throws IOException
+    {
+        // Define the variables
+        Competition comp = new Competition(false);
+        DBConnection cnt = new DBConnection();
+        String sqlQuery;
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+        
+        try
+        {
+            sqlQuery = "SELECT * FROM competition WHERE compCode = ?";
+            ps = (PreparedStatement) cnt.getDBConnection().prepareStatement(sqlQuery);
+            ps.setString(1, tableCompCode);
+            rs = ps.executeQuery();
+            rs.next();
+            comp.setCode(rs.getString("compCode"));
+            comp.setName(rs.getString("compName"));
+            comp.setDescription(rs.getString("compDescription"));
+            comp.setLocation(rs.getString("compLocation"));
+            java.sql.Date sqlCompStartDate = rs.getDate("compStartDate");
+            java.util.Date compStartDate = new java.util.Date(sqlCompStartDate.getTime());
+            comp.setStartDate(compStartDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+            java.sql.Date sqlCompEndDate = rs.getDate("compStartDate");
+            java.util.Date compEndDate = new java.util.Date(sqlCompEndDate.getTime());
+            comp.setEndDate(compEndDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+        }
+        catch(SQLException ex)
+        {
+            Logger.getLogger(DBConnection.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        finally
+        {
+            try { rs.close(); } catch (SQLException e) { /* ignored */ }
+            try { ps.close(); } catch (SQLException e) { /* ignored */ }
+            try { cnt.disconnect(); } catch (Exception e) { /* ignored */ }
+        }
+        
+        return comp;
+    }
+    
+    public static void updateCompetition(Competition comp) throws IOException
+    {
+        // Define the variables
+        DBConnection cnt = new DBConnection();
+        String sqlQuery;
+        PreparedStatement ps = null;
+        
+        try
+        {
+            sqlQuery = "UPDATE competition SET compName = ?, compDescription = ?, compLocation = ?, compStartDate = ?, compEndDate = ? WHERE compCode = ?";
+            ps = (PreparedStatement) cnt.getDBConnection().prepareStatement(sqlQuery);
+            ps.setString(1, comp.getName());
+            ps.setString(2, comp.getDescription());
+            ps.setString(3, comp.getLocation());
+            java.util.Date compStartDate = Date.from(comp.getStartDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
+            java.sql.Date sqlcompStartDate = new java.sql.Date(compStartDate.getTime());
+            ps.setDate(4, sqlcompStartDate);
+            java.util.Date compEndDate = Date.from(comp.getStartDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
+            java.sql.Date sqlcompEndDate = new java.sql.Date(compEndDate.getTime());
+            ps.setDate(5, sqlcompEndDate);
+            ps.setString(6, comp.getCode());
+            ps.executeUpdate();
+        }
+        catch(SQLException ex)
+        {
+            Logger.getLogger(DBConnection.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        finally
+        {
+            try { ps.close(); } catch (SQLException e) { /* ignored */ }
+            try { cnt.disconnect(); } catch (Exception e) { /* ignored */ }
+        }
+    }
+    
+    public static ArrayList <Competition> searchCompetition(String search) throws IOException
+    {
+        // Define the variables
+        ArrayList <Competition> alComp = new ArrayList();
+        DBConnection cnt = new DBConnection();
+        String sqlQuery;
+        Statement stmt = null;
+        ResultSet rs = null;
+        
+        try
+        {
+            stmt = (Statement) cnt.getDBConnection().createStatement();
+            sqlQuery = "SELECT * FROM competition "
+                    + "WHERE (compName LIKE '%" + search + "%') OR (compDescription LIKE '%" + search + "%') OR (compLocation LIKE '%" + search + "%') "
+                    + "ORDER BY compStartDate, compEndDate";
+            rs = stmt.executeQuery(sqlQuery);
+            
+            while(rs.next())
+            {
+                Competition comp = new Competition(false);
+                comp.setCode(rs.getString("compCode"));
+                comp.setName(rs.getString("compName"));
+                comp.setDescription(rs.getString("compDescription"));
+                comp.setLocation(rs.getString("compLocation"));
+                java.sql.Date sqlCompStartDate = rs.getDate("compStartDate");
+                java.util.Date compStartDate = new java.util.Date(sqlCompStartDate.getTime());
+                comp.setStartDate(compStartDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+                java.sql.Date sqlCompEndDate = rs.getDate("compStartDate");
+                java.util.Date compEndDate = new java.util.Date(sqlCompEndDate.getTime());
+                comp.setEndDate(compEndDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+                alComp.add(comp);
+            }
+        }
+        catch(SQLException ex)
+        {
+            // JOptionPane.showMessageDialog(null, "Error, no se conecto");
+        }
+        
+        finally
+        {
+            try { rs.close(); } catch (SQLException e) { /* ignored */ }
+            try { stmt.close(); } catch (SQLException e) { /* ignored */ }
+            try { cnt.disconnect(); } catch (Exception e) { /* ignored */ }
+        }
+
+        return alComp;
     }
 }
